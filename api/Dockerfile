@@ -1,10 +1,10 @@
-FROM node:14.15.3-slim
+FROM node:20.14.0-bookworm-slim
 
 WORKDIR /usr/src/api
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-  mysql-client 
+  default-mysql-client
 
 COPY package.json ./
 COPY package-lock.json ./
