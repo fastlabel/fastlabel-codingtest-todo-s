@@ -54,9 +54,9 @@ export class ItemService {
 
   async update(id: string, params: ItemUpdateParams): Promise<ItemVO> {
     const dto = await this.itemRepository.findByIdOrFail(id);
-    if (params.order) dto.order = params.order;
-    if (params.content) dto.content = params.content;
-    if (params.isDone) dto.isDone = params.isDone;
+    if (params.order !== undefined) dto.order = params.order;
+    if (params.content !== undefined) dto.content = params.content;
+    if (params.isDone !== undefined) dto.isDone = params.isDone;
     await this.itemRepository.save(dto);
     return dto.toVO();
   }
