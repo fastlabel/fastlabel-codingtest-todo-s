@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useRef } from "react";
 import { Theme } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
 import createStyles from "@mui/styles/createStyles";
@@ -7,7 +7,7 @@ import Grid from "@mui/material/Grid";
 import { ItemVO } from "../types/vo";
 import ItemList from "../components/ItemList";
 import ItemForm from "../components/ItemForm";
-import ItemSearch from "../components/ItemSearch";
+import { default as ItemSearch, Ref as ItemSearchRef } from "../components/ItemSearch";
 import { TodoStore } from "../stores/todo-store";
 import { useSnackbar } from "notistack";
 import { TODO_MAX_LIMIT } from "../types/const";
@@ -24,7 +24,8 @@ const Index: FC<Props> = () => {
   const styles = useStyles();
   const { enqueueSnackbar } = useSnackbar();
   const todoStore = TodoStore.useContainer();
-
+  
+  const search = useRef<ItemSearchRef | null>(null);
   const [items, setItems] = useState<ItemVO[]>([]);
 
   useEffect(() => {
@@ -43,7 +44,8 @@ const Index: FC<Props> = () => {
       isDone: false,
     });
     if (item) {
-      setItems([...items, item]);
+      setItems(await todoStore.loadItems());
+      if (search.current) search.current.clear();
     } else {
       enqueueSnackbar("TODOの追加に失敗しました");
     }
@@ -101,7 +103,7 @@ const Index: FC<Props> = () => {
             <ItemForm onAddItem={onAddItem} />
           </Box>
           <Box>
-            <ItemSearch onSearchItem={onSearchItem} />
+            <ItemSearch ref={search} onSearchItem={onSearchItem} />
           </Box>
           <Box>
             <ItemList
