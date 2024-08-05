@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 
@@ -6,8 +6,16 @@ type Props = {
   onSearchItem: (keyword: string) => Promise<void>;
 };
 
-const ItemSearch: FC<Props> = ({ onSearchItem }) => {
+export type Ref = {
+  clear: () => void;
+};
+
+const ItemSearch = forwardRef<Ref, Props>(({ onSearchItem }, ref) => {
   const [keyword, setKeyword] = useState("");
+
+  useImperativeHandle(ref, () => ({
+    clear: () => setKeyword(""),
+  }));
 
   return (
     <Box>
@@ -24,6 +32,6 @@ const ItemSearch: FC<Props> = ({ onSearchItem }) => {
       />
     </Box>
   );
-};
+});
 
 export default ItemSearch;
