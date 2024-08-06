@@ -8,3 +8,7 @@ export type ItemUpdateParams = {
   content?: string;
   isDone?: boolean;
 };
+
+export type ItemsDeleteParams = {
+  ids: string[];
+};
