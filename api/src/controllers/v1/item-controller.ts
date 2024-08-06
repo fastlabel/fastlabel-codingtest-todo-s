@@ -14,7 +14,7 @@ import {
 import { ItemService } from "../../services/item-service";
 import { provideSingleton, inject } from "../../middlewares/inversify/ioc-util";
 import { ItemVO } from "../../types/vo";
-import { ItemCreateParams, ItemUpdateParams } from "../../types/request";
+import { ItemCreateParams, ItemUpdateParams, ItemsDeleteParams } from "../../types/request";
 import { getCustomRepository } from "typeorm";
 import { ItemRepository } from "../../repositories/item-repository";
 
@@ -75,5 +75,11 @@ export class ItemController extends Controller {
   @SuccessResponse(204, "Succeeded")
   public async delete(@Request() req: any, id: string): Promise<void> {
     await this.itemRepository.delete(id);
+  }
+
+  @Delete()
+  @SuccessResponse(204, "Succeeded")
+  public async deletes(@Request() req: any, @Body() params: ItemsDeleteParams): Promise<void> {
+    await this.itemRepository.delete(params.ids);
   }
 }
