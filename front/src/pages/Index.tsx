@@ -74,16 +74,10 @@ const Index: FC<Props> = () => {
   };
 
   const onDeleteAllItems = async (ids: string[]) => {
-    let allSucceeded = true;
-    for (const id of ids) {
-      const succeeded = await todoStore.deleteItem(id);
-      if (succeeded) {
-        setItems(items.filter((i) => i.id !== id));
-      } else {
-        allSucceeded = false;
-      }
-    }
-    if (!allSucceeded) {
+    const succeeded = await todoStore.deleteItems({ ids });
+    if (succeeded) {
+      setItems([]);
+    } else {
       enqueueSnackbar("TODOの削除に失敗しました");
     }
   };

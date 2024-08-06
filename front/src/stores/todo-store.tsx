@@ -1,6 +1,6 @@
 import { createContainer } from "unstated-next";
 import { AxiosUtil } from "../applications/utils/axios-util";
-import { ItemCreateParams, ItemUpdateParams } from "../types/request";
+import { ItemCreateParams, ItemsDeleteParams, ItemUpdateParams } from "../types/request";
 import { ItemVO } from "../types/vo";
 
 export const useTodoStore = () => {
@@ -53,6 +53,13 @@ export const useTodoStore = () => {
     });
     return response.data;
   }
+  const deleteItems = async (params: ItemsDeleteParams): Promise<boolean> => {
+    const axios = AxiosUtil.createBase();
+    const response = await axios.delete("/items", { data: params }).catch((e) => {
+      return { status: 500 };
+    });
+    return response.status === 204;
+  };
 
   return {
     loadItems,
@@ -61,6 +68,7 @@ export const useTodoStore = () => {
     updateItem,
     deleteItem,
     searchItems,
+    deleteItems,
   };
 };
 
