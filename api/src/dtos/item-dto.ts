@@ -18,10 +18,6 @@ export class ItemDto {
 
   toEntity = (): Item => {
     const entity = new Item(this.id, this.order, this.content, this.isDone);
-    entity.id = this.id;
-    entity.order = this.order;
-    entity.content = this.content;
-    entity.isDone = this.isDone;
     return entity;
   };
 
