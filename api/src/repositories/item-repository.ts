@@ -20,12 +20,9 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async get(): Promise<ItemDto[]> {
-    let entities = await this.createQueryBuilder("items").getMany();
-    entities = entities.sort((a, b) => {
-      if (a.order < b.order) return -1;
-      if (a.order > b.order) return 1;
-      return 0;
-    });
+    let entities = await this.createQueryBuilder("items")
+      .orderBy("items.order", "ASC")
+      .getMany();
     const results = [] as any;
     entities.forEach((e) => {
       results.push(ItemDto.fromEntity(e));
