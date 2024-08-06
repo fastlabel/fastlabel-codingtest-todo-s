@@ -36,18 +36,13 @@ export class ItemService {
   }
 
   async create(params: ItemCreateParams): Promise<ItemVO> {
-    const r = this.itemRepository;
-    if ((await r.count()) >= TODO_LIMIT_COUNT) {
-      throw new ClientError(
-        ClientErrorStatusCodes.UNPROCESSABLE_ENTITY,
-        `Todo count is up to ${TODO_LIMIT_COUNT}.`
-      );
+    if (await this.isUpToLimit()) {
+      const message = `Todo count is up to ${TODO_LIMIT_COUNT}.`;
+      throw new ClientError(ClientErrorStatusCodes.UNPROCESSABLE_ENTITY, message);
     }
-    const item1 = await r.findLastByOrder();
-    const order = item1 ? item1.order + 1 : 1;
-    const item2 = new ItemDto(uuid(), order, params.content, params.isDone);
-    await r.save(item2.toEntity());
-    return item2.toVO();
+    const item = new ItemDto(uuid(), await this.getNextOrder(), params.content, params.isDone);
+    await this.itemRepository.save(item.toEntity());
+    return item.toVO();
   }
 
   async update(id: string, params: ItemUpdateParams): Promise<ItemVO> {
@@ -57,5 +52,15 @@ export class ItemService {
     if (params.isDone) dto.isDone = params.isDone;
     await this.itemRepository.save(dto);
     return dto.toVO();
+  }
+
+  async isUpToLimit(): Promise<boolean> {
+    const count = await this.itemRepository.count();
+    return count >= TODO_LIMIT_COUNT;
+  }
+
+  async getNextOrder(): Promise<number> {
+    const lastItem = await this.itemRepository.findLastByOrder();
+    return lastItem ? lastItem.order + 1 : 1;
   }
 }
