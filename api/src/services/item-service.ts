@@ -10,6 +10,8 @@ import {
   ClientErrorStatusCodes,
 } from "../middlewares/client-error";
 
+const TODO_LIMIT_COUNT: number = 10;
+
 @provideSingleton(ItemService)
 export class ItemService {
   private itemRepository: ItemRepository;
@@ -39,10 +41,10 @@ export class ItemService {
 
   async create(params: ItemCreateParams): Promise<ItemVO> {
     const r = this.itemRepository;
-    if ((await r.count()) >= 10) {
+    if ((await r.count()) >= TODO_LIMIT_COUNT) {
       throw new ClientError(
         ClientErrorStatusCodes.UNPROCESSABLE_ENTITY,
-        "Todo count is up to 10."
+        `Todo count is up to ${TODO_LIMIT_COUNT}.`
       );
     }
     const item1 = await r.findLastByOrder();
