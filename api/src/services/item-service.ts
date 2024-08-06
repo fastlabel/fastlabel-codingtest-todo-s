@@ -51,7 +51,13 @@ export class ItemService {
     if (params.order) dto.order = params.order;
     if (params.content) dto.content = params.content;
     if (params.isDone) dto.isDone = params.isDone;
-    await this.itemRepository.save(dto);
+    const entity = dto.toEntity();
+    const errors: ValidationError[] = await validate(entity);
+    if (errors.length > 0) {
+      const message = this.validationErrorMessages(errors).join(", ");
+      throw new ClientError(ClientErrorStatusCodes.UNPROCESSABLE_ENTITY, message);
+    }
+    await this.itemRepository.save(entity);
     return dto.toVO();
   }
 
