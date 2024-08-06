@@ -22,11 +22,7 @@ export class ItemService {
 
   async get(): Promise<ItemVO[]> {
     const dtos = await this.itemRepository.get();
-    const results = [] as any;
-    dtos.forEach((d) => {
-      results.push(d.toVO());
-    });
-    return results;
+    return dtos.map((dto) => dto.toVO());
   }
 
   async find(id: string): Promise<ItemVO> {
@@ -36,7 +32,7 @@ export class ItemService {
 
   async search(keyword: string): Promise<ItemVO[]> {
     const dtos = await this.itemRepository.search(keyword);
-    return dtos.map((d) => d.toVO());
+    return dtos.map((dto) => dto.toVO());
   }
 
   async create(params: ItemCreateParams): Promise<ItemVO> {
