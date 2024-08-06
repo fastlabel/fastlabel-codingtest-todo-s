@@ -1,13 +1,17 @@
 import { FC, useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import { useDebounce } from "../applications/hooks/debounce";
 
 type Props = {
   onSearchItem: (keyword: string) => Promise<void>;
 };
 
+const INPUT_DELAY = 300;
+
 const ItemSearch: FC<Props> = ({ onSearchItem }) => {
   const [keyword, setKeyword] = useState("");
+  const [debouncedSearchItem] = useDebounce(onSearchItem, INPUT_DELAY);
 
   return (
     <Box>
@@ -19,7 +23,7 @@ const ItemSearch: FC<Props> = ({ onSearchItem }) => {
         fullWidth
         onChange={(e) => {
           setKeyword(e.target.value);
-          onSearchItem(e.target.value);
+          debouncedSearchItem(e.target.value);
         }}
       />
     </Box>
