@@ -78,7 +78,7 @@ const Index: FC<Props> = () => {
     for (const id of ids) {
       const succeeded = await todoStore.deleteItem(id);
       if (succeeded) {
-        setItems(items.filter((i) => i.id !== id));
+        setItems((prevItems) => prevItems.filter((i) => i.id !== id));
       } else {
         allSucceeded = false;
       }
