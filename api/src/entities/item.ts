@@ -6,16 +6,20 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { UpToLimit } from "../validators/up-to-limit";
+
+export const TODO_MAX_LIMIT = 10;
 
 @Entity({ name: "items" })
 @Unique("idx_items_order", ["order"])
 export class Item {
+  @UpToLimit(TODO_MAX_LIMIT)
   @PrimaryGeneratedColumn("uuid")
   id: string;
-
+  
   @Column({ unsigned: true })
   order: number;
-
+  
   @Column({ length: 80 })
   content: string;
 

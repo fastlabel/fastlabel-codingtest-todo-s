@@ -9,6 +9,7 @@ import {
   ClientError,
   ClientErrorStatusCodes,
 } from "../middlewares/client-error";
+import { validate, ValidationError } from "class-validator";
 
 @provideSingleton(ItemService)
 export class ItemService {
@@ -20,11 +21,7 @@ export class ItemService {
 
   async get(): Promise<ItemVO[]> {
     const dtos = await this.itemRepository.get();
-    const results = [] as any;
-    dtos.forEach((d) => {
-      results.push(d.toVO());
-    });
-    return results;
+    return dtos.map((dto) => dto.toVO());
   }
 
   async find(id: string): Promise<ItemVO> {
@@ -34,22 +31,19 @@ export class ItemService {
 
   async search(keyword: string): Promise<ItemVO[]> {
     const dtos = await this.itemRepository.search(keyword);
-    return dtos.map((d) => d.toVO());
+    return dtos.map((dto) => dto.toVO());
   }
 
   async create(params: ItemCreateParams): Promise<ItemVO> {
-    const r = this.itemRepository;
-    if ((await r.count()) >= 10) {
-      throw new ClientError(
-        ClientErrorStatusCodes.UNPROCESSABLE_ENTITY,
-        "Todo count is up to 10."
-      );
+    const dto = new ItemDto(uuid(), await this.getNextOrder(), params.content, params.isDone);
+    const entity = dto.toEntity();
+    const errors: ValidationError[] = await validate(entity);
+    if (errors.length > 0) {
+      const message = this.validationErrorMessages(errors).join(", ");
+      throw new ClientError(ClientErrorStatusCodes.UNPROCESSABLE_ENTITY, message);
     }
-    const item1 = await r.findLastByOrder();
-    const order = item1 ? item1.order + 1 : 1;
-    const item2 = new ItemDto(uuid(), order, params.content, params.isDone);
-    await r.save(item2.toEntity());
-    return item2.toVO();
+    await this.itemRepository.save(entity);
+    return dto.toVO();
   }
 
   async update(id: string, params: ItemUpdateParams): Promise<ItemVO> {
@@ -57,7 +51,24 @@ export class ItemService {
     if (params.order) dto.order = params.order;
     if (params.content) dto.content = params.content;
     if (params.isDone) dto.isDone = params.isDone;
-    await this.itemRepository.save(dto);
+    const entity = dto.toEntity();
+    const errors: ValidationError[] = await validate(entity);
+    if (errors.length > 0) {
+      const message = this.validationErrorMessages(errors).join(", ");
+      throw new ClientError(ClientErrorStatusCodes.UNPROCESSABLE_ENTITY, message);
+    }
+    await this.itemRepository.save(entity);
     return dto.toVO();
+  }
+
+  async getNextOrder(): Promise<number> {
+    const lastItem = await this.itemRepository.findLastByOrder();
+    return lastItem ? lastItem.order + 1 : 1;
+  }
+
+  validationErrorMessages(errors: ValidationError[]): string[] {
+    return errors
+      .map((error) => Object.values(error.constraints as any) as string[])
+      .reduce((acc, cur) => acc.concat(cur), []);
   }
 }
